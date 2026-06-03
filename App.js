@@ -68,6 +68,7 @@ export default function App() {
   const [editingEntry, setEditingEntry] = useState(null);
   const [formName, setFormName] = useState('');
   const [formPage, setFormPage] = useState('');
+  const [formCopy, setFormCopy] = useState('C1');
   const [formError, setFormError] = useState('');
 
   const [toast, setToast] = useState({ visible: false, message: '', type: 'success' });
@@ -101,6 +102,7 @@ export default function App() {
     setEditingEntry(null);
     setFormName('');
     setFormPage('');
+    setFormCopy('C1');
     setFormError('');
     setModalVisible(true);
   };
@@ -109,6 +111,7 @@ export default function App() {
     setEditingEntry(entry);
     setFormName(entry.name);
     setFormPage(String(entry.page));
+    setFormCopy(entry.copy || 'C1');
     setFormError('');
     setModalVisible(true);
   };
@@ -118,6 +121,7 @@ export default function App() {
     setEditingEntry(null);
     setFormName('');
     setFormPage('');
+    setFormCopy('C1');
     setFormError('');
   };
 
@@ -134,12 +138,12 @@ export default function App() {
     if (editingEntry) {
       updated = entries.map((e) =>
         e.id === editingEntry.id
-          ? { ...e, name: trimmedName, page: Number(trimmedPage) }
+          ? { ...e, name: trimmedName, page: Number(trimmedPage), copy: formCopy }
           : e
       );
       showToast(`"${trimmedName}" updated successfully`, 'success');
     } else {
-      updated = [...entries, { id: Date.now().toString(), name: trimmedName, page: Number(trimmedPage), createdAt: new Date().toISOString() }];
+      updated = [...entries, { id: Date.now().toString(), name: trimmedName, page: Number(trimmedPage), copy: formCopy, createdAt: new Date().toISOString() }];
       showToast(`"${trimmedName}" added successfully`, 'success');
     }
     setEntries(updated);
@@ -178,9 +182,13 @@ export default function App() {
           {/* Left accent strip */}
           <View style={styles.cardAccent} />
 
+          {/* Copy badge */}
+          <View style={[(item.copy || 'C1') === 'C2' ? styles.copyTagC2 : styles.copyTagC1]}>
+            <Text style={styles.copyTagText}>{item.copy || 'C1'}</Text>
+          </View>
+
           {/* Page number avatar */}
           <View style={styles.pageBox}>
-            <Text style={styles.pageBoxLabel}>Pg.</Text>
             <Text style={styles.pageBoxNum}>{item.page}</Text>
           </View>
 
@@ -347,6 +355,27 @@ export default function App() {
             </View>
 
             <View style={styles.divider} />
+
+            {/* Copy selector */}
+            <Text style={styles.fieldLabel}>Copy</Text>
+            <View style={styles.copySelector}>
+              {['C1', 'C2'].map((c) => (
+                <TouchableOpacity
+                  key={c}
+                  style={[styles.copySelectorBtn, formCopy === c && styles.copySelectorBtnActive]}
+                  onPress={() => setFormCopy(c)}
+                >
+                  <MaterialIcons
+                    name={c === 'C1' ? 'looks-one' : 'looks-two'}
+                    size={18}
+                    color={formCopy === c ? '#FFFFFF' : '#90A4AE'}
+                  />
+                  <Text style={[styles.copySelectorText, formCopy === c && styles.copySelectorTextActive]}>
+                    Copy {c === 'C1' ? '1' : '2'}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
 
             <Text style={styles.fieldLabel}>Name</Text>
             <View style={styles.inputWrapper}>
@@ -564,19 +593,34 @@ const styles = StyleSheet.create({
     marginLeft: 14,
     marginVertical: 14,
   },
-  pageBoxLabel: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 9,
-    fontWeight: '700',
+  copyTagC1: {
+    marginLeft: 10,
+    backgroundColor: '#1565C0',
+    borderRadius: 6,
+    paddingHorizontal: 7,
+    paddingVertical: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  copyTagC2: {
+    marginLeft: 10,
+    backgroundColor: '#E65100',
+    borderRadius: 6,
+    paddingHorizontal: 7,
+    paddingVertical: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  copyTagText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '800',
     letterSpacing: 0.5,
-    textTransform: 'uppercase',
-    lineHeight: 11,
   },
   pageBoxNum: {
     color: '#FFFFFF',
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '900',
-    lineHeight: 22,
   },
   cardInfo: { flex: 1, paddingHorizontal: 14, justifyContent: 'center' },
   cardName: { fontSize: 15, fontWeight: '700', color: '#1A237E' },
@@ -617,6 +661,35 @@ const styles = StyleSheet.create({
   modalTitle: { fontSize: 17, fontWeight: '800', color: '#1A237E' },
   modalSubtitle: { fontSize: 12, color: '#90A4AE', marginTop: 2 },
   divider: { height: 1, backgroundColor: '#EEF2F7', marginBottom: 14 },
+  copySelector: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 4,
+  },
+  copySelectorBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: '#CFD8DC',
+    backgroundColor: '#FAFBFC',
+  },
+  copySelectorBtnActive: {
+    backgroundColor: '#1565C0',
+    borderColor: '#1565C0',
+  },
+  copySelectorText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#90A4AE',
+  },
+  copySelectorTextActive: {
+    color: '#FFFFFF',
+  },
   fieldLabel: {
     fontSize: 11, fontWeight: '700', color: '#78909C',
     marginBottom: 6, marginTop: 12,
